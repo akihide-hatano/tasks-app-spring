@@ -1,6 +1,7 @@
 package com.example.taskapiapp.controller;
 
 import com.example.taskapiapp.entity.User;
+import com.example.taskapiapp.exception.UserNotFoundException;
 import com.example.taskapiapp.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,14 +58,107 @@ public class UserControllerTest {
         when(userService.create(any(User.class))).thenReturn(user);
 
         mockMvc.perform(post("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                            {
-                                "name": "石田",
-                                "email": "ishida@example.com",
-                                "password": "password123"
-                            }
-                            """))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "name": "石田",
+                                    "email": "ishida@example.com",
+                                    "password": "password123"
+                                }
+                                """))
                 .andExpect(status().isCreated());
     }
+
+    @Test
+    void ユーザー作成でnameが空の場合は400が返却されること() throws Exception {
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "name": "",
+                                    "email": "ishida@example.com",
+                                    "password": "password123"
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void ユーザー作成でemailが空の場合は400が返却されること() throws Exception {
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "name": "石田",
+                                    "email": "",
+                                    "password": "password123"
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void ユーザー作成でpasswordが空の場合は400が返却されること() throws Exception {
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "name": "石田",
+                                    "email": "ishida@example.com",
+                                    "password": ""
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void ユーザー作成でemailが不正な形式の場合は400が返却されること() throws Exception {
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "name": "石田",
+                                    "email": "aaa",
+                                    "password": "password123"
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
+
+
+    @Test
+    void 存在するユーザーが取得できること() throws Exception {
+        User user = new User();
+        user.setId(1L);
+        user.setName("石田");
+        user.setEmail("ishida@example.com");
+        user.setPassword("password123");
+
+        when(userService.findById(1L)).thenReturn(user);
+
+        mockMvc.perform(get("/users/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("""
+                        {
+                            "id": 1,
+                            "name": "石田",
+                            "email": "ishida@example.com",
+                            "password": "password123"
+                        }
+                        """));
+    }
+
+    @Test
+    void 存在しないユーザーを取得しようとした場合は404が返却されること() throws Exception {
+        when(userService.findById(999L)).thenThrow(new UserNotFoundException(999L));
+        mockMvc.perform(get("/users/999"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("User not found with id: 999"));
+    }
+
+
+
+
+
 }
