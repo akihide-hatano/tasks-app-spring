@@ -1,5 +1,6 @@
 package com.example.taskapiapp.controller;
 
+import com.example.taskapiapp.entity.User;
 import com.example.taskapiapp.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +11,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.ArgumentMatchers.any;
+import org.springframework.http.MediaType;
 
 
 @WebMvcTest(UserController.class)
@@ -23,10 +28,43 @@ public class UserControllerTest {
     @MockitoBean
     private UserService userService;
 
+
     @Test
-    void ユーザー一覧取得で200が返却されること() throws Exception {
+    void ユーザーが0件で空のリストが返却されること() throws Exception {
         when(userService.findAll()).thenReturn(List.of());
         mockMvc.perform(get("/users"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+    }
+
+    @Test
+    void ユーザー一覧取得でサービス例外が発生した場合は500が返却されること() throws Exception {
+        when(userService.findAll()).thenThrow(new RuntimeException("DB Error"));
+
+        mockMvc.perform(get("/users"))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void ユーザー作成で201が返却されること() throws Exception {
+        // ユーザー作成のテストコードをここに追加
+
+        User user = new User();
+        user.setId(1L);
+        user.setName("石田");
+        user.setEmail("ishida@example.com");
+
+        when(userService.create(any(User.class))).thenReturn(user);
+
+        mockMvc.perform(post("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                            {
+                                "name": "石田",
+                                "email": "ishida@example.com",
+                                "password": "password123"
+                            }
+                            """))
+                .andExpect(status().isCreated());
     }
 }
