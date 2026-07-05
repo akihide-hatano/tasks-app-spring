@@ -11,7 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -147,6 +147,68 @@ public class UserControllerTest {
                             "password": "password123"
                         }
                         """));
+    }
+
+    @Test
+    void ユーザー作成でnameの長さが50文字の場合は201が返却されること() throws Exception {
+        String longName = "あ".repeat(50);
+
+        User user = new User();
+        user.setId(1L);
+        user.setName(longName);
+        user.setEmail("ishida@example.com");
+        user.setPassword("password123");
+
+
+        when(userService.create(any(User.class))).thenReturn(user);
+
+        mockMvc.perform(post("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "name": "%s",
+                            "email": "ishida@example.com",
+                            "password": "password123"
+                        }
+                        """.formatted(longName)))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void ユーザ作成でnameが51文字の場合は400が返却されること() throws Exception {
+        String longName = "あ".repeat(51);
+
+        mockMvc.perform(post("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "name": "%s",
+                            "email": "ishida@example.com",
+                            "password": "password123"
+                        }
+                        """.formatted(longName)))
+                .andExpect(status().isBadRequest());
+
+        verify(userService,never()).create(any(User.class));
+    }
+
+    @Test
+    void ユーザー作成でemailが不正な場合は400が返却されること() throws Exception {
+
+        //ドメインを作成する
+        String domain = "@example.com";
+        String longEmail = "a".repeat(91) + domain;
+
+        mockMvc.perform(post("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "name": "石田",
+                            "email": "%s",
+                            "password": "password123"
+                        }
+                        """.formatted(longEmail)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
