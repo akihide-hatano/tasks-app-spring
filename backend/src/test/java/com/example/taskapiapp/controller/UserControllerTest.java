@@ -12,9 +12,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.mockito.ArgumentMatchers.any;
 import org.springframework.http.MediaType;
@@ -112,6 +111,44 @@ public class UserControllerTest {
     }
 
     @Test
+    void ユーザー作成でpasswordが8文字未満のときは400が返却されること() throws Exception {
+
+        String shortPassword = "a".repeat(7);
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "name": "石田",
+                                    "email": "ishida@example.com",
+                                    "password": "%s"
+                                }
+                                """.formatted(shortPassword)))
+                .andExpect(status().isBadRequest());
+
+        verify(userService, never()).create(any(User.class));
+    }
+
+    @Test
+    void ユーザー作成でpasswordが100文字以上のときは400で返却されること() throws Exception {
+        String shortPassword = "a".repeat(101);
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "name": "石田",
+                                    "email": "ishida@example.com",
+                                    "password": "%s"
+                                }
+                                """.formatted(shortPassword)))
+                .andExpect(status().isBadRequest());
+
+        verify(userService, never()).create(any(User.class));
+    }
+
+
+    @Test
     void ユーザー作成でemailが不正な形式の場合は400が返却されること() throws Exception {
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -124,8 +161,6 @@ public class UserControllerTest {
                                 """))
                 .andExpect(status().isBadRequest());
     }
-
-
 
     @Test
     void 存在するユーザーが取得できること() throws Exception {
@@ -163,14 +198,14 @@ public class UserControllerTest {
         when(userService.create(any(User.class))).thenReturn(user);
 
         mockMvc.perform(post("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                        {
-                            "name": "%s",
-                            "email": "ishida@example.com",
-                            "password": "password123"
-                        }
-                        """.formatted(longName)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "name": "%s",
+                                    "email": "ishida@example.com",
+                                    "password": "password123"
+                                }
+                                """.formatted(longName)))
                 .andExpect(status().isCreated());
     }
 
@@ -179,18 +214,19 @@ public class UserControllerTest {
         String longName = "あ".repeat(51);
 
         mockMvc.perform(post("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                        {
-                            "name": "%s",
-                            "email": "ishida@example.com",
-                            "password": "password123"
-                        }
-                        """.formatted(longName)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "name": "%s",
+                                    "email": "ishida@example.com",
+                                    "password": "password123"
+                                }
+                                """.formatted(longName)))
                 .andExpect(status().isBadRequest());
 
-        verify(userService,never()).create(any(User.class));
+        verify(userService, never()).create(any(User.class));
     }
+
 
     @Test
     void ユーザー作成でemailが不正な場合は400が返却されること() throws Exception {
@@ -200,14 +236,14 @@ public class UserControllerTest {
         String longEmail = "a".repeat(91) + domain;
 
         mockMvc.perform(post("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                        {
-                            "name": "石田",
-                            "email": "%s",
-                            "password": "password123"
-                        }
-                        """.formatted(longEmail)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "name": "石田",
+                                    "email": "%s",
+                                    "password": "password123"
+                                }
+                                """.formatted(longEmail)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -220,7 +256,99 @@ public class UserControllerTest {
     }
 
 
+    @Test
+    void ユーザー更新が200で返却されること() throws Exception {
 
+        User user = new User();
+        user.setId(1L);
+        user.setName("山下");
+        user.setEmail("yamashita@example.com");
+        user.setPassword("password123");
 
+        when(userService.update(any(Long.class), any(User.class))).thenReturn(user);
 
+        mockMvc.perform(put("/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "name": "山下",
+                                  "email": "yamashita@example.com",
+                                  "password": "password123"
+                                }"""
+                        ))
+                .andExpect(status().isOk())
+                .andExpect(content().json("""
+                        {
+                            "id": 1,
+                            "name": "山下",
+                            "email": "yamashita@example.com",
+                            "password": "password123"
+                        }
+                        """));
+
+        verify(userService).update(any(Long.class), any(User.class));
+    }
+
+    @Test
+    void ユーザー更新でnameが空の時は400が戻る() throws Exception {
+        mockMvc.perform(put("/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "name": "",
+                                  "email": "yamashita@example.com",
+                                  "password": "password123"
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+        verify(userService, never()).update(any(Long.class), any(User.class));
+    }
+
+    @Test
+    void ユーザー更新でemailが空の場合は400が返る() throws Exception {
+        mockMvc.perform(put("/users/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                            { "name": "山下",
+                              "email": "",
+                              "password": "password123"
+                            }
+                            """))
+                .andExpect(status().isBadRequest());
+        verify(userService, never()).update(any(Long.class), any(User.class));
+    }
+
+    @Test
+    void ユーザー更新でpasswordが空の場合は400が返る() throws Exception {
+        mockMvc.perform(put("/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "name": "山下",
+                                  "email": "yamashita@example.com",
+                                  "password":""
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+        verify(userService, never()).update(any(Long.class), any(User.class));
+    }
+
+    @Test
+    void ユーザー削除で204が返る() throws Exception {
+        doNothing().when(userService).delete(1L);
+
+        mockMvc.perform(delete("/users/1"))
+                .andExpect(status().isNoContent());
+
+        verify(userService).delete(1L);
+    }
+
+    @Test
+    void 存在しないユーザー削除では404が返却されること() throws Exception {
+        doThrow(new UserNotFoundException(999L))
+                .when(userService).delete(999L);
+
+        mockMvc.perform(delete("/users/999"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("User not found with id: 999"));
+
+        verify(userService).delete(999L);
+    }
 }
