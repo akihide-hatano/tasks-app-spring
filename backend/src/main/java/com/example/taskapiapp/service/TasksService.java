@@ -4,6 +4,8 @@ import com.example.taskapiapp.entity.Task;
 import com.example.taskapiapp.repository.TaskRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class TasksService {
 
@@ -13,7 +15,7 @@ public class TasksService {
         this.taskRepository = taskRepository;
     }
 
-    public Task findAll(){
+    public List<Task> findAll(){
         return taskRepository.findAll();
     }
 
