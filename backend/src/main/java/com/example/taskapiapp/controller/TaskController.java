@@ -1,6 +1,7 @@
 package com.example.taskapiapp.controller;
 
 import com.example.taskapiapp.entity.Task;
+import com.example.taskapiapp.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +19,13 @@ public class TaskController {
     private final TaskService taskService;
 
     @GetMapping
-    public List<Task> getTasks(){
-        return taskService.getAllTasks();
+    public List<Task> findAll() {
+        return taskService.findAll();
     }
 
     @GetMapping("/{id}")
-        public String getTasksId(@PathVariable Long id){
-            return taskService.getTaskById(id);
+        public Task findById(@PathVariable Long id){
+            return taskService.findById(id);
     }
 
     @PostMapping
