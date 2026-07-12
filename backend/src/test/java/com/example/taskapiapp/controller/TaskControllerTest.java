@@ -13,10 +13,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -153,4 +151,77 @@ public class TaskControllerTest {
                                 """))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void タスクが登録されているものを変更した場合200が返却される()throws Exception{
+
+        Task updateTask = new Task();
+        updateTask.setId(1L);
+        updateTask.setTitle("Task Update");
+        updateTask.setDescription("Description Update");
+
+        when(taskService.update(any(Long.class), any(Task.class))).thenReturn(updateTask);
+
+        mockMvc.perform(put("/tasks/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "title": "Task Update",
+                                    "description": "Description Update"
+                                }
+                                """))
+                .andExpect(status().isOk());
+        }
+
+        @Test
+    void タスク登録されていないものを変更した場合は404が返却される()throws Exception{
+
+        when(taskService.update(any(Long.class), any(Task.class))).thenThrow(new TaskNotFoundException(1L));
+
+        mockMvc.perform(put("/tasks/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "title": "Task Update",
+                                    "description": "Description Update"
+                                }
+                                """))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void タスクが登録されているものを更新したが空のtitleを指定した場合は400が返却される()throws Exception{
+
+        mockMvc.perform(put("/tasks/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "title": "",
+                                    "description": "Description Update"
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void タスクが登録されているものを削除すると204を返す() throws Exception{
+
+        mockMvc.perform(delete("/tasks/1"))
+                .andExpect(status().isNoContent());
+
+        verify(taskService).delete(1L);
+    }
+
+    @Test
+    void タスクが登録されていないものを削除すると404を返す() throws Exception {
+
+        doThrow(new TaskNotFoundException(1L))
+                .when(taskService).delete(1L);
+
+        mockMvc.perform(delete("/tasks/1"))
+                .andExpect(status().isNotFound());
+
+        verify(taskService).delete(1L);
+    }
+
 }
