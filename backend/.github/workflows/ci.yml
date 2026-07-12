@@ -4,21 +4,23 @@ on:
   push:
     branches:
       - main
-
   pull_request:
     branches:
       - main
 
 jobs:
   test:
-
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
 
     steps:
       - name: ソースコードを取得
         uses: actions/checkout@v4
 
-      - name: Java21をセットアップ
+      - name: Java 21をセットアップ
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -26,6 +28,9 @@ jobs:
 
       - name: Gradleをセットアップ
         uses: gradle/actions/setup-gradle@v4
+
+      - name: Gradle Wrapperに実行権限を付与
+        run: chmod +x gradlew
 
       - name: テスト実行
         run: ./gradlew test
