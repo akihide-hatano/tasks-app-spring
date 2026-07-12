@@ -6,14 +6,17 @@ import com.example.taskapiapp.service.TaskService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -101,4 +104,53 @@ public class TaskControllerTest {
         verify(taskService).findById(1L);
     }
 
+    @Test
+    void タスクを登録すると201が返却されタスクが登路される()throws Exception{
+
+        Task task1 = new Task();
+        task1.setId(1L);
+        task1.setTitle("Task 1");
+        task1.setDescription("Description 1");
+
+        when(taskService.create(any(Task.class))).thenReturn(task1);
+
+        mockMvc.perform(post("/tasks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "title": "Task 1",
+                                    "description": "Description 1"
+                                }
+                                """))
+                .andExpect(status().isCreated());
+    }
+
+
+    @Test
+    void タスクを登録する際にタイトルが空の場合は400が返却される()throws Exception{
+
+        mockMvc.perform(post("/tasks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "title": "",
+                                    "description": "Description 1"
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void タスクを登録する際に説明文が空の場合は400が返却される()throws Exception{
+
+        mockMvc.perform(post("/tasks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "title": "Task 1",
+                                    "description": ""
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+    }
 }
