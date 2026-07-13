@@ -30,7 +30,7 @@ public class TaskControllerTest {
     void タスクが0件の場合は空のリストが返却される() throws Exception {
         when(taskService.findAll()).thenReturn(List.of());
 
-        mockMvc.perform(get("/tasks"))
+        mockMvc.perform(get("/api/tasks"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));
 
@@ -51,7 +51,7 @@ public class TaskControllerTest {
         task2.setDescription("Description 2");
 
         when(taskService.findAll()).thenReturn(List.of(task1,task2));
-        mockMvc.perform(get("/tasks"))
+        mockMvc.perform(get("/api/tasks"))
                 .andExpect(status().isOk())
                         .andExpect(
                                 content().json("""
@@ -81,7 +81,7 @@ public class TaskControllerTest {
 
         when(taskService.findById(1L)).thenReturn(task1);
 
-        mockMvc.perform(get("/tasks/1"))
+        mockMvc.perform(get("/api/tasks/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
                         {
@@ -97,7 +97,7 @@ public class TaskControllerTest {
     void 指定したIDのタスクが存在しない場合は404が返却される() throws Exception {
         when(taskService.findById(1L)).thenThrow(new TaskNotFoundException(1L));
 
-        mockMvc.perform(get("/tasks/1"))
+        mockMvc.perform(get("/api/tasks/1"))
                 .andExpect(status().isNotFound());
         verify(taskService).findById(1L);
     }
@@ -112,7 +112,7 @@ public class TaskControllerTest {
 
         when(taskService.create(any(Task.class))).thenReturn(task1);
 
-        mockMvc.perform(post("/tasks")
+        mockMvc.perform(post("/api/tasks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -127,7 +127,7 @@ public class TaskControllerTest {
     @Test
     void タスクを登録する際にタイトルが空の場合は400が返却される()throws Exception{
 
-        mockMvc.perform(post("/tasks")
+        mockMvc.perform(post("/api/tasks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -141,7 +141,7 @@ public class TaskControllerTest {
     @Test
     void タスクを登録する際に説明文が空の場合は400が返却される()throws Exception{
 
-        mockMvc.perform(post("/tasks")
+        mockMvc.perform(post("/api/tasks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -162,7 +162,7 @@ public class TaskControllerTest {
 
         when(taskService.update(any(Long.class), any(Task.class))).thenReturn(updateTask);
 
-        mockMvc.perform(put("/tasks/1")
+        mockMvc.perform(put("/api/tasks/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -178,7 +178,7 @@ public class TaskControllerTest {
 
         when(taskService.update(any(Long.class), any(Task.class))).thenThrow(new TaskNotFoundException(1L));
 
-        mockMvc.perform(put("/tasks/1")
+        mockMvc.perform(put("/api/tasks/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -192,7 +192,7 @@ public class TaskControllerTest {
     @Test
     void タスクが登録されているものを更新したが空のtitleを指定した場合は400が返却される()throws Exception{
 
-        mockMvc.perform(put("/tasks/1")
+        mockMvc.perform(put("/api/tasks/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -206,7 +206,7 @@ public class TaskControllerTest {
     @Test
     void タスクが登録されているものを削除すると204を返す() throws Exception{
 
-        mockMvc.perform(delete("/tasks/1"))
+        mockMvc.perform(delete("/api/tasks/1"))
                 .andExpect(status().isNoContent());
 
         verify(taskService).delete(1L);
@@ -218,7 +218,7 @@ public class TaskControllerTest {
         doThrow(new TaskNotFoundException(1L))
                 .when(taskService).delete(1L);
 
-        mockMvc.perform(delete("/tasks/1"))
+        mockMvc.perform(delete("/api/tasks/1"))
                 .andExpect(status().isNotFound());
 
         verify(taskService).delete(1L);
