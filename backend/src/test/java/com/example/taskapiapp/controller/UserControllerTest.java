@@ -32,7 +32,7 @@ public class UserControllerTest {
     @Test
     void ユーザーが0件で空のリストが返却されること() throws Exception {
         when(userService.findAll()).thenReturn(List.of());
-        mockMvc.perform(get("/users"))
+        mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));
     }
@@ -41,7 +41,7 @@ public class UserControllerTest {
     void ユーザー一覧取得でサービス例外が発生した場合は500が返却されること() throws Exception {
         when(userService.findAll()).thenThrow(new RuntimeException("DB Error"));
 
-        mockMvc.perform(get("/users"))
+        mockMvc.perform(get("/api/users"))
                 .andExpect(status().isInternalServerError());
     }
 
@@ -56,7 +56,7 @@ public class UserControllerTest {
 
         when(userService.create(any(User.class))).thenReturn(user);
 
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -70,7 +70,7 @@ public class UserControllerTest {
 
     @Test
     void ユーザー作成でnameが空の場合は400が返却されること() throws Exception {
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -84,7 +84,7 @@ public class UserControllerTest {
 
     @Test
     void ユーザー作成でemailが空の場合は400が返却されること() throws Exception {
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -98,7 +98,7 @@ public class UserControllerTest {
 
     @Test
     void ユーザー作成でpasswordが空の場合は400が返却されること() throws Exception {
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -115,7 +115,7 @@ public class UserControllerTest {
 
         String shortPassword = "a".repeat(7);
 
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -133,7 +133,7 @@ public class UserControllerTest {
     void ユーザー作成でpasswordが100文字以上のときは400で返却されること() throws Exception {
         String shortPassword = "a".repeat(101);
 
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -150,7 +150,7 @@ public class UserControllerTest {
 
     @Test
     void ユーザー作成でemailが不正な形式の場合は400が返却されること() throws Exception {
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -172,7 +172,7 @@ public class UserControllerTest {
 
         when(userService.findById(1L)).thenReturn(user);
 
-        mockMvc.perform(get("/users/1"))
+        mockMvc.perform(get("/api/users/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
                         {
@@ -197,7 +197,7 @@ public class UserControllerTest {
 
         when(userService.create(any(User.class))).thenReturn(user);
 
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -213,7 +213,7 @@ public class UserControllerTest {
     void ユーザ作成でnameが51文字の場合は400が返却されること() throws Exception {
         String longName = "あ".repeat(51);
 
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -235,7 +235,7 @@ public class UserControllerTest {
         String domain = "@example.com";
         String longEmail = "a".repeat(91) + domain;
 
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -250,7 +250,7 @@ public class UserControllerTest {
     @Test
     void 存在しないユーザーを取得しようとした場合は404が返却されること() throws Exception {
         when(userService.findById(999L)).thenThrow(new UserNotFoundException(999L));
-        mockMvc.perform(get("/users/999"))
+        mockMvc.perform(get("/api/users/999"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("User not found with id: 999"));
     }
@@ -267,7 +267,7 @@ public class UserControllerTest {
 
         when(userService.update(any(Long.class), any(User.class))).thenReturn(user);
 
-        mockMvc.perform(put("/users/1")
+        mockMvc.perform(put("/api/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 { "name": "山下",
@@ -290,7 +290,7 @@ public class UserControllerTest {
 
     @Test
     void ユーザー更新でnameが空の時は400が戻る() throws Exception {
-        mockMvc.perform(put("/users/1")
+        mockMvc.perform(put("/api/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 { "name": "",
@@ -304,7 +304,7 @@ public class UserControllerTest {
 
     @Test
     void ユーザー更新でemailが空の場合は400が返る() throws Exception {
-        mockMvc.perform(put("/users/1")
+        mockMvc.perform(put("/api/users/1")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                             { "name": "山下",
@@ -318,7 +318,7 @@ public class UserControllerTest {
 
     @Test
     void ユーザー更新でpasswordが空の場合は400が返る() throws Exception {
-        mockMvc.perform(put("/users/1")
+        mockMvc.perform(put("/api/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 { "name": "山下",
@@ -334,7 +334,7 @@ public class UserControllerTest {
     void ユーザー削除で204が返る() throws Exception {
         doNothing().when(userService).delete(1L);
 
-        mockMvc.perform(delete("/users/1"))
+        mockMvc.perform(delete("/api/users/1"))
                 .andExpect(status().isNoContent());
 
         verify(userService).delete(1L);
@@ -345,7 +345,7 @@ public class UserControllerTest {
         doThrow(new UserNotFoundException(999L))
                 .when(userService).delete(999L);
 
-        mockMvc.perform(delete("/users/999"))
+        mockMvc.perform(delete("/api/users/999"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("User not found with id: 999"));
 
