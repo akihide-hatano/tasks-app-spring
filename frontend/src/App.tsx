@@ -39,7 +39,7 @@ function App() {
         setIsSubmitting(true);
 
         try{
-            const newTask: Task = { title, description, status };
+            const newTask = { title, description, status };
             const response = await fetch("http://localhost:8080/api/tasks", {
                 method: "POST",
                 headers: {
@@ -56,7 +56,7 @@ function App() {
 
             setTitle("");
             setDescription("");
-            setStatus("");
+            setStatus("TODO");
 
             await loadTasks();
         }catch(err){
@@ -124,8 +124,10 @@ function App() {
                 </div>
 
                 <form onSubmit={handleSubmit}>
-                    <input/>
-                    <button type="submit">登録</button>
+                    <label htmlFor="title">タスクタイトル</label>
+                    <input id="title" type="text" value={title}
+                           onChange={(e) => setTitle(e.target.value)} required />
+                    <button type="submit" disabled={isSubmitting}>{isSubmitting ? "登録中..." : "登録"}</button>
                 </form>
 
                 <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-slate-200/60">
