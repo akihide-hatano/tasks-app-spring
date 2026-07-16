@@ -1,5 +1,6 @@
 package com.example.taskapiapp.controller;
 
+import com.example.taskapiapp.dto.request.TaskCreateRequest;
 import com.example.taskapiapp.entity.Task;
 import com.example.taskapiapp.service.TaskService;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +29,8 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<Task> create(@Validated @RequestBody Task task) {
-        Task createdTask = taskService.create(task);
+    public ResponseEntity<Task> create(@Validated @RequestBody TaskCreateRequest request) {
+        Task createdTask = taskService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
     }
 
