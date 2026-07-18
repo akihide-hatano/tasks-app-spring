@@ -9,20 +9,6 @@ function App() {
     const [description, setDescription] = useState("");
     const [status, setStatus] = useState("TODO");
 
-    const loadTasks = async () => {
-        const response = await fetch("http://localhost:8080/api/tasks");
-
-        if (!response.ok) {
-            throw new Error(
-                `タスクの取得に失敗しました: ${response.statusText}`
-            );
-        }
-
-        const data: Task[] = await response.json();
-        setTasks(data);
-    };
-
-
     //送信ボタンの状態管理
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -39,7 +25,13 @@ function App() {
         setIsSubmitting(true);
 
         try{
-            const newTask = { title, description, status ,userId :1};
+            //送信するdataを作る
+            const newTask = { title,
+                            description,
+                            status ,
+                            userId :11};
+
+            //Spring BootへPOSTリクエストを送る
             const response = await fetch("http://localhost:8080/api/tasks", {
                 method: "POST",
                 headers: {
@@ -66,6 +58,33 @@ function App() {
             setIsSubmitting(false);
         }
     };
+
+    //GET
+    const loadTasks = async () => {
+        try {
+            const response = await fetch("http://localhost:8080/api/tasks");
+
+            if (!response.ok) {
+                throw new Error(
+                    `タスク一覧の取得に: ${response.status}`
+                );
+            }
+
+            const data = await response.json();
+            setTasks(data);
+        } catch (err) {
+            console.error("タスク一覧の取得に失敗しました", err);
+            alert("タスク一覧の取得に失敗しました。時間をおいて再度お試しください。");
+        }
+    }
+
+    //まとめてputする
+    const handleUpdateTask = async (
+        taskId:number,
+        title:string,
+        description:string,
+        status:string,
+    ) => {}
 
     useEffect(() => {
         loadTasks();
@@ -131,6 +150,12 @@ function App() {
                     <label htmlFor="description">タスク説明</label>
                     <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} required></textarea>
 
+                    <label htmlFor="status">ステータス</label>
+                    <select id="status" value={status} onChange={(e) => setStatus(e.target.value)} required>
+                        <option value="TODO">TODO</option>
+                        <option value="IN_PROGRESS">IN_PROGRESS</option>
+                        <option value="DONE">DONE</option>
+                    </select>
                     <button type="submit" disabled={isSubmitting}>{isSubmitting ? "登録中..." : "登録"}</button>
                 </form>
 
