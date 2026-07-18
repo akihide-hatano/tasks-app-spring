@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Task } from "./types/Task";
+import TaskStatus,{type TaskStatus as TaskStatusType }
+    from "./types/TaskStatus";
 
 function App() {
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -7,7 +9,7 @@ function App() {
     //post用のstateを追加
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
-    const [status, setStatus] = useState("TODO");
+    const [status, setStatus] = useState<TaskStatusType>(TaskStatus.TODO);
 
     //送信ボタンの状態管理
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,7 +50,7 @@ function App() {
 
             setTitle("");
             setDescription("");
-            setStatus("TODO");
+            setStatus(TaskStatus.TODO);
 
             await loadTasks();
         }catch(err){
@@ -83,19 +85,20 @@ function App() {
         taskId:number,
         title:string,
         description:string,
-        status:string,
+        status:TaskStatusType,
     ) => {}
 
     useEffect(() => {
         loadTasks();
     }, []);
 
-    const getStatusClassName = (status: string) => {
+    const getStatusClassName = (status: TaskStatusType) => {
         switch (status) {
-            case "DONE":
+            case TaskStatus.DONE:
                 return "bg-emerald-100 text-emerald-700";
-            case "IN_PROGRESS":
+            case TaskStatus.IN_PROGRESS:
                 return "bg-amber-100 text-amber-700";
+            case TaskStatus.TODO:
             default:
                 return "bg-slate-100 text-slate-700";
         }
@@ -151,10 +154,10 @@ function App() {
                     <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} required></textarea>
 
                     <label htmlFor="status">ステータス</label>
-                    <select id="status" value={status} onChange={(e) => setStatus(e.target.value)} required>
-                        <option value="TODO">TODO</option>
-                        <option value="IN_PROGRESS">IN_PROGRESS</option>
-                        <option value="DONE">DONE</option>
+                    <select id="status" value={status} onChange={(e) => setStatus(e.target.value as TaskStatusType)} required>
+                        <option value={TaskStatus.TODO}>TODO</option>
+                        <option value={TaskStatus.IN_PROGRESS}>IN_PROGRESS</option>
+                        <option value={TaskStatus.DONE}>DONE</option>
                     </select>
                     <button type="submit" disabled={isSubmitting}>{isSubmitting ? "登録中..." : "登録"}</button>
                 </form>
