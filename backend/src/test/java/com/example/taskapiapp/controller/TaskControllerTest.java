@@ -1,5 +1,6 @@
 package com.example.taskapiapp.controller;
 
+import com.example.taskapiapp.dto.request.TaskCreateRequest;
 import com.example.taskapiapp.entity.Task;
 import com.example.taskapiapp.exception.TaskNotFoundException;
 import com.example.taskapiapp.service.TaskService;
@@ -110,7 +111,7 @@ public class TaskControllerTest {
         task1.setTitle("Task 1");
         task1.setDescription("Description 1");
 
-        when(taskService.create(any(Task.class))).thenReturn(task1);
+        when(taskService.create(any(TaskCreateRequest.class))).thenReturn(task1);
 
         mockMvc.perform(post("/api/tasks")
                         .contentType(MediaType.APPLICATION_JSON)

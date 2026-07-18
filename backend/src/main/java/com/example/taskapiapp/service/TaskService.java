@@ -1,8 +1,10 @@
 package com.example.taskapiapp.service;
 
+import com.example.taskapiapp.dto.request.TaskCreateRequest;
 import com.example.taskapiapp.entity.Task;
 import com.example.taskapiapp.exception.TaskNotFoundException;
 import com.example.taskapiapp.repository.TaskRepository;
+import com.example.taskapiapp.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -10,9 +12,11 @@ import java.util.List;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+    private final UserRepository userRepository;
 
-    public TaskService(TaskRepository taskRepository) {
+    public TaskService(TaskRepository taskRepository, UserRepository userRepository) {
         this.taskRepository = taskRepository;
+        this.userRepository = userRepository;
     }
 
     public List<Task> findAll(){
@@ -23,7 +27,13 @@ public class TaskService {
         return taskRepository.findById(id).orElseThrow(() -> new TaskNotFoundException(id));
     }
 
-    public Task create(Task task){
+    public Task create(TaskCreateRequest request){
+
+        Task task = new Task();
+        task.setTitle(request.title());
+        task.setDescription(request.description());
+        task.setStatus(request.status());
+        task.setUser(userRepository.findById(request.userId()).orElseThrow(() -> new RuntimeException("User not found")));
         return taskRepository.save(task);
     }
 
