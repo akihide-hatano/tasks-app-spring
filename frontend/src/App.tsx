@@ -86,7 +86,32 @@ function App() {
         title:string,
         description:string,
         status:TaskStatusType,
-    ) => {}
+    ) => {
+        try {
+            //更新するdataを作成
+            const updatedTask = { title, description, status };
+            //PUTリクエストを送信
+            const response = await fetch(`http://localhost:8080/api/tasks/${taskId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(updatedTask),
+            });
+
+            if (!response.ok) {
+                throw new Error(
+                    `タスクの更新に失敗しました: ${response.statusText}`
+                );
+            }
+
+            //一覧を再取得
+            await loadTasks();
+        } catch (err) {
+            console.error("タスクの更新に失敗しました", err);
+            alert("タスクの更新に失敗しました." );
+        }
+    }
 
     useEffect(() => {
         loadTasks();
@@ -193,6 +218,9 @@ function App() {
                                     <th className="px-6 py-4 text-xs font-bold tracking-wider text-slate-500">
                                         ステータス
                                     </th>
+                                    <th className="px-6 py-4 text-xs font-bold tracking-wider text-slate-500">
+                                        操作
+                                    </th>
                                 </tr>
                                 </thead>
 
@@ -224,6 +252,19 @@ function App() {
                                                 >
                                                     {task.status}
                                                 </span>
+                                        </td>
+
+                                        <td className={"px-6 py-5"}>
+                                            <button type="button"
+                                                    onClick={() => handleUpdateTask(
+                                                        task.id,
+                                                        task.title,
+                                                        task.description,
+                                                        TaskStatus.DONE
+                                                    )}
+                                            >
+                                                DONEにする
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
