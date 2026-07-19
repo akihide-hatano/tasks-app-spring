@@ -12,6 +12,8 @@ function App() {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [status, setStatus] = useState<TaskStatusType>(TaskStatus.TODO);
+    //delete用のstateを追加(ここはidで管理)
+    const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null);
 
     //送信ボタンの状態管理
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -129,6 +131,15 @@ function App() {
             return;
         }
 
+        //すでに別の削除処理が走っている場合は中断する
+        if(deletingTaskId !== null) {
+            return;
+        }
+
+        //削除処理中のタスクIDをセットする
+        setDeletingTaskId(taskId);
+
+
         try {
         //まずはapiを叩く
             const response = await fetch(`http://localhost:8080/api/tasks/${taskId}`,
@@ -143,6 +154,9 @@ function App() {
             //サーバーエラーなどで削除できない場合のエラー
             console.error("タスクの削除に失敗しました", err);
             alert("タスクの削除に失敗しました。時間をおいて再度お試しください。");
+        }finally {
+            //削除処理中のタスクIDをリセットする
+            setDeletingTaskId(null);
         }
     }
 
