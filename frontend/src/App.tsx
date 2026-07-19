@@ -3,6 +3,8 @@ import type { Task } from "./types/Task";
 import TaskStatus,{type TaskStatus as TaskStatusType }
     from "./types/TaskStatus";
 
+import { FaTrash } from "react-icons/fa";
+
 function App() {
     const [tasks, setTasks] = useState<Task[]>([]);
 
@@ -80,7 +82,7 @@ function App() {
         }
     }
 
-    //まとめてputする
+    //UPDATE
     const handleUpdateTask = async (
         taskId:number,
         title:string,
@@ -116,6 +118,33 @@ function App() {
     useEffect(() => {
         loadTasks();
     }, []);
+
+    //DELETE
+    const handleDeleteTask = async (taskId: number) => {
+
+        //削除確認のダイアログを表示する
+        const confirmDelete = window.confirm("本当に削除しますか？");
+        //キャンセルされた場合は処理を中断する
+        if (!confirmDelete) {
+            return;
+        }
+
+        try {
+        //まずはapiを叩く
+            const response = await fetch(`http://localhost:8080/api/tasks/${taskId}`,
+                {method: "DELETE"});
+            //早期リターンでエラーを投げる
+            if (!response.ok){
+                throw  new Error(`タスクの削除に失敗しました: ${response.status}`);
+            }
+        //削除したあとに一覧を再度取得する(await忘れない)
+        await loadTasks();
+        }catch (err) {
+            //サーバーエラーなどで削除できない場合のエラー
+            console.error("タスクの削除に失敗しました", err);
+            alert("タスクの削除に失敗しました。時間をおいて再度お試しください。");
+        }
+    }
 
     const getStatusClassName = (status: TaskStatusType) => {
         switch (status) {
@@ -354,6 +383,7 @@ function App() {
                                         </td>
 
                                         <td className={"px-6 py-5"}>
+                                            <div className= "flex items-center gap-3">
                                             <select value={task.status}
                                                     onChange={(e) =>
                                                         handleUpdateTask(task.id,
@@ -363,6 +393,20 @@ function App() {
                                                 <option value="IN_PROGRESS">IN_PROGRESS</option>
                                                 <option value="DONE">DONE</option>
                                             </select>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDeleteTask(task.id)}
+                                                    className="
+                                                            flex h-12 items-center gap-2
+                                                            rounded-lg border border-red-200
+                                                            bg-red-600 px-3
+                                                            text-sm font-semibold text-white
+                                                            transition
+                                                            hover:bg-red-50">
+                                                    <FaTrash />
+                                                    削除
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
