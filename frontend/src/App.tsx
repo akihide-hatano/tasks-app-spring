@@ -170,21 +170,120 @@ function App() {
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit}>
-                    <label htmlFor="title">タスクタイトル</label>
-                    <input id="title" type="text" value={title}
-                           onChange={(e) => setTitle(e.target.value)} required />
 
-                    <label htmlFor="description">タスク説明</label>
-                    <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} required></textarea>
+                <form
+                    onSubmit={handleSubmit}
+                    className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+                >
+                    <div className="mb-6">
+                        <h3 className="text-xl font-bold text-slate-900">
+                            新規タスク登録
+                        </h3>
 
-                    <label htmlFor="status">ステータス</label>
-                    <select id="status" value={status} onChange={(e) => setStatus(e.target.value as TaskStatusType)} required>
-                        <option value={TaskStatus.TODO}>TODO</option>
-                        <option value={TaskStatus.IN_PROGRESS}>IN_PROGRESS</option>
-                        <option value={TaskStatus.DONE}>DONE</option>
-                    </select>
-                    <button type="submit" disabled={isSubmitting}>{isSubmitting ? "登録中..." : "登録"}</button>
+                        <p className="mt-1 text-sm text-slate-500">
+                            タスクのタイトル・説明・ステータスを入力してください。
+                        </p>
+                    </div>
+
+                    <div className="space-y-5">
+                        <div>
+                            <label
+                                htmlFor="title"
+                                className="mb-2 block text-sm font-semibold text-slate-700"
+                            >
+                                タイトル
+                            </label>
+
+                            <input
+                                id="title"
+                                type="text"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                required
+                                placeholder="例：タスク削除機能を実装する"
+                                className="
+                    w-full rounded-lg border border-slate-300
+                    px-4 py-3 text-slate-900
+                    outline-none transition
+                    placeholder:text-slate-400
+                    focus:border-slate-500
+                    focus:ring-2 focus:ring-slate-200
+                "
+                            />
+                        </div>
+
+                        <div>
+                            <label
+                                htmlFor="description"
+                                className="mb-2 block text-sm font-semibold text-slate-700"
+                            >
+                                説明
+                            </label>
+
+                            <textarea
+                                id="description"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                required={true}
+                                placeholder="タスクの内容を入力してください"
+                                rows={4}
+                                className="
+                    w-full resize-none rounded-lg border border-slate-300
+                    px-4 py-3 text-slate-900
+                    outline-none transition
+                    placeholder:text-slate-400
+                    focus:border-slate-500
+                    focus:ring-2 focus:ring-slate-200
+                "
+                            />
+                        </div>
+
+                        <div>
+                            <label
+                                htmlFor="status"
+                                className="mb-2 block text-sm font-semibold text-slate-700"
+                            >
+                                ステータス
+                            </label>
+
+                            <select
+                                id="status"
+                                value={status}
+                                onChange={(e) =>
+                                    setStatus(e.target.value as TaskStatusType)
+                                }
+                                className="
+                    w-full rounded-lg border border-slate-300
+                    bg-white px-4 py-3 text-slate-900
+                    outline-none transition
+                    focus:border-slate-500
+                    focus:ring-2 focus:ring-slate-200
+                "
+                            >
+                                <option value={TaskStatus.TODO}>TODO</option>
+                                <option value={TaskStatus.IN_PROGRESS}>
+                                    IN_PROGRESS
+                                </option>
+                                <option value={TaskStatus.DONE}>DONE</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="mt-6 flex justify-end">
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="
+                rounded-lg bg-slate-900 px-6 py-3
+                text-sm font-bold text-white
+                transition hover:bg-slate-700
+                disabled:cursor-not-allowed
+                disabled:bg-slate-400
+            "
+                        >
+                            {isSubmitting ? "登録中..." : "＋ タスクを登録"}
+                        </button>
+                    </div>
                 </form>
 
                 <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-slate-200/60">
@@ -255,16 +354,15 @@ function App() {
                                         </td>
 
                                         <td className={"px-6 py-5"}>
-                                            <button type="button"
-                                                    onClick={() => handleUpdateTask(
-                                                        task.id,
-                                                        task.title,
-                                                        task.description,
-                                                        TaskStatus.DONE
-                                                    )}
-                                            >
-                                                DONEにする
-                                            </button>
+                                            <select value={task.status}
+                                                    onChange={(e) =>
+                                                        handleUpdateTask(task.id,
+                                                            task.title, task.description,
+                                                        e.target.value as TaskStatusType)}>
+                                                <option value="TODO">TODO</option>
+                                                <option value="IN_PROGRESS">IN_PROGRESS</option>
+                                                <option value="DONE">DONE</option>
+                                            </select>
                                         </td>
                                     </tr>
                                 ))}
