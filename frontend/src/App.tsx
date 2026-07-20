@@ -1,5 +1,6 @@
 import { Routes,Route } from "react-router-dom";
 import TaskList from "./pages/TaskList";
+import TaskDetail from "./pages/TaskDetail.tsx";
 
 function App() {
     return (
@@ -8,6 +9,10 @@ function App() {
             path="/"
             element={<TaskList />}
             />
+        <Route
+            path="/tasks/:id"
+            element={<TaskDetail/>}
+        />
         </Routes>
     );
 }
