@@ -4,6 +4,7 @@ import TaskStatus,{type TaskStatus as TaskStatusType }
     from "../types/TaskStatus";
 
 import { FaTrash } from "react-icons/fa";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 function TaskList() {
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -17,6 +18,9 @@ function TaskList() {
 
     //送信ボタンの状態管理
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    //loadingの管理
+    const [loading, setLoading] = useState(true);
 
     //post処理
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -68,6 +72,9 @@ function TaskList() {
     //GET
     const loadTasks = async () => {
         try {
+
+            setLoading(true);
+
             const response = await fetch("http://localhost:8080/api/tasks");
 
             if (!response.ok) {
@@ -81,6 +88,9 @@ function TaskList() {
         } catch (err) {
             console.error("タスク一覧の取得に失敗しました", err);
             alert("タスク一覧の取得に失敗しました。時間をおいて再度お試しください。");
+        }
+        finally {
+            setLoading(false);
         }
     }
 
@@ -120,6 +130,10 @@ function TaskList() {
     useEffect(() => {
         loadTasks();
     }, []);
+
+    if(loading){
+        return <LoadingSpinner />;
+    }
 
     //DELETE
     const handleDeleteTask = async (taskId: number) => {
