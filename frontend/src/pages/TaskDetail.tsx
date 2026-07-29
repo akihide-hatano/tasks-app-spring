@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { Link,useParams } from "react-router-dom";
+import { Link,useNavigate,useParams } from "react-router-dom";
 import type { Task } from "../types/Task";
 import { getStatusInfo } from "../utils/taskStatus";
+import { FaTrash } from "react-icons/fa";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 function TaskDetail() {
     const { id } = useParams<{ id: string }>();
@@ -9,6 +11,7 @@ function TaskDetail() {
     const [task, setTask] = useState<Task | null>(null);
     const [loading, setLoading] = useState(true);
     const [error,setError] = useState<string | null>(null);
+    const  navigate = useNavigate();
 
     useEffect(()  => {
         const loadTask = async () => {
@@ -40,7 +43,7 @@ function TaskDetail() {
 }, [id]);
 
     if(loading) {
-        return <div>Loading...</div>;
+        return <LoadingSpinner />;
     }
 
     if(error) {
@@ -70,6 +73,8 @@ function TaskDetail() {
             if(!response.ok) {
                 throw new Error(`タスクの削除に失敗しました: ${response.status}`);
             }
+
+            navigate("/");
 
         } catch (error) {
             const message = error instanceof Error ? error.message : "タスクの削除に失敗しました";
@@ -107,14 +112,18 @@ function TaskDetail() {
                         </span>
                     </div>
 
-                    <div>
-                        <Link to="/">
+                    <div className="flex items-center justify-center w-full gap-4">
+                        <Link to="/"
+                              className="rounded-lg border border-gray-300 bg-white px-5 py-2 font-medium text-gray-700 transition hover:bg-gray-100">
                             一覧に戻る
                         </Link>
-                        <Link to={`/tasks/${task.id}/edit`} className="text-blue-500 hover:underline">
+                        <Link to={`/tasks/${task.id}/edit`}
+                              className="rounded-lg bg-blue-600 px-5 py-2 font-medium text-white transition hover:bg-blue-700">
                             編集
                         </Link>
-                        <button onClick={handleDelete}>
+                        <button onClick={handleDelete}
+                                className="rounded-lg bg-red-600 px-5 py-2 font-medium text-white transition hover:bg-red-700">
+                            <FaTrash className="inline-block mr-2" />
                             削除
                         </button>
                     </div>
