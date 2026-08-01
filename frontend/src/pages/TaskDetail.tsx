@@ -5,15 +5,44 @@ import { getStatusInfo } from "../utils/taskStatus";
 import { FaTrash } from "react-icons/fa";
 import LoadingSpinner from "../components/LoadingSpinner";
 
+import { useLocation } from "react-router-dom";
+import Message from "../components/Message";
+import { useNotice } from "../hooks/useNotice";
+
+
 function TaskDetail() {
-    const { id } = useParams<{ id: string }>();
+    const {id} = useParams<{ id: string }>();
 
     const [task, setTask] = useState<Task | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error,setError] = useState<string | null>(null);
-    const  navigate = useNavigate();
+    const [error, setError] = useState<string | null>(null);
 
-    useEffect(()  => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const {notice, showSuccess, showError} = useNotice();
+
+
+    //画面遷移で通知を受け取るための処理
+    useEffect(() => {
+
+        const receivedNotice = location.state?.notice;
+        if (!receivedNotice) {
+            return;
+        }
+        if (receivedNotice.type === "success") {
+            showSuccess(receivedNotice.message);
+        } else if (receivedNotice.type === "error") {
+            showError(receivedNotice.message);
+        }
+
+        //受け取った通知をクリアするために、location.stateを更新
+        navigate(location.pathname, {
+            replace: true,
+            state: null
+        });
+    }, []);
+
+    useEffect(() => {
         const loadTask = async () => {
             if(!id) {
                 setError("タスクIDが指定されていません");
@@ -41,6 +70,7 @@ function TaskDetail() {
         };
     loadTask();
 }, [id]);
+
 
     if(loading) {
         return <LoadingSpinner />;
@@ -88,6 +118,13 @@ function TaskDetail() {
                 <h1 className="text-2xl font-bold mb-6">
                     タスク詳細
                 </h1>
+
+                {notice && (
+                    <Message
+                        type={notice.type}
+                        message={notice.message}
+                    />
+                )}
 
                 <div className="space-y-4">
                     <div>

@@ -3,6 +3,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import type { Task, TaskStatusType } from "../types/Task";
 import LoadingSpinner from "../components/LoadingSpinner";
 
+import { useNotice } from "../hooks/useNotice";
+import Message from "../components/Message";
+
+
 function TaskEdit() {
     const {id} = useParams<{id:string}>();
     const navigate= useNavigate();
@@ -16,6 +20,8 @@ function TaskEdit() {
 
     const[loading,setLoading] = useState(true);
     const [error,setError] = useState<string | null>(null);
+
+    const {notice, showSuccess, showError} = useNotice();
 
     useEffect(() => {
         const loadTask = async () => {
@@ -47,6 +53,7 @@ function TaskEdit() {
                 setStatus(data.status);
             } catch (error) {
                 setError((error as Error).message);
+                showError("タスク詳細の取得に失敗しました。時間をおいて再度お試しください。");
             } finally {
                 setLoading(false);
             }
@@ -91,9 +98,18 @@ function TaskEdit() {
                 throw new Error(`タスクの更新に失敗しました: ${response.status}`);
             }
 
-            navigate(`/tasks/${id}`);
+            navigate(`/tasks/${id}`,{
+                state:{
+                    notice:{
+                        type:"success",
+                        message:"タスクを更新しました。"
+                    },
+                },
+            });
+
         } catch (error) {
             setError((error as Error).message);
+            showError("タスクの更新に失敗しました。時間をおいて再度お試しください。");
         } finally {
             setIsSubmitting(false);
         }
@@ -113,10 +129,11 @@ function TaskEdit() {
                         タスク編集
                     </h1>
 
-                    {error && (
-                        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                            {error}
-                        </div>
+                    {notice && (
+                        <Message
+                            type={notice.type}
+                            message={notice.message}
+                        />
                     )}
 
                     <form
