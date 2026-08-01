@@ -2,6 +2,7 @@ package com.example.taskapiapp.controller;
 
 import com.example.taskapiapp.dto.request.TaskCreateRequest;
 import com.example.taskapiapp.entity.Task;
+import com.example.taskapiapp.entity.TaskStatus;
 import com.example.taskapiapp.exception.TaskNotFoundException;
 import com.example.taskapiapp.service.TaskService;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -110,18 +112,23 @@ public class TaskControllerTest {
         task1.setId(1L);
         task1.setTitle("Task 1");
         task1.setDescription("Description 1");
+        task1.setStatus(TaskStatus.TODO);
 
         when(taskService.create(any(TaskCreateRequest.class))).thenReturn(task1);
 
         mockMvc.perform(post("/api/tasks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {
-                                    "title": "Task 1",
-                                    "description": "Description 1"
-                                }
-                                """))
+                {
+                    "title": "Task 1",
+                    "description": "Description 1",
+                    "status": "TODO",
+                    "userId":11
+                }
+                """))
+                .andDo(print())
                 .andExpect(status().isCreated());
+
     }
 
 
