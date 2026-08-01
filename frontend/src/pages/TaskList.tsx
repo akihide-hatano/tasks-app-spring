@@ -7,6 +7,7 @@ import TaskStatus,{type TaskStatus as TaskStatusType }
 import { FaTrash } from "react-icons/fa";
 import LoadingSpinner from "../components/LoadingSpinner";
 
+import { getStatusInfo } from "../utils/taskStatus";
 import { useNotice } from "../hooks/useNotice";
 import Message from "../components/Message";
 
@@ -400,10 +401,13 @@ function TaskList() {
                                 </thead>
 
                                 <tbody className="divide-y divide-slate-100">
-                                {tasks.map((task) => (
-                                    <tr
-                                        key={task.id}
-                                        onClick={()=> navigate(`/tasks/${task.id}`)}
+                                {tasks.map((task) => {
+
+                                    const statusInfo = getStatusInfo(task.status);
+                                    return (
+                                        <tr
+                                            key={task.id}
+                                            onClick={()=> navigate(`/tasks/${task.id}`)}
                                         className="cursor-pointer transition duration-150 hover:bg-slate-50 hover:shadow-sm hover:scale-[1.01]"
                                     >
                                         <td className="px-6 py-5 text-sm font-medium text-slate-400">
@@ -422,11 +426,9 @@ function TaskList() {
 
                                         <td className="px-6 py-5">
                                                 <span
-                                                    className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${getStatusClassName(
-                                                        task.status
-                                                    )}`}
+                                                    className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${statusInfo.className}`}
                                                 >
-                                                    {task.status}
+                                                    {statusInfo.label}
                                                 </span>
                                         </td>
 
@@ -438,9 +440,9 @@ function TaskList() {
                                                         handleUpdateTask(task.id,
                                                             task.title, task.description,
                                                         e.target.value as TaskStatusType)}>
-                                                <option value="TODO">TODO</option>
-                                                <option value="IN_PROGRESS">IN_PROGRESS</option>
-                                                <option value="DONE">DONE</option>
+                                                <option value={TaskStatus.TODO}>{getStatusInfo(TaskStatus.TODO).label}</option>
+                                                <option value={TaskStatus.IN_PROGRESS}>{getStatusInfo(TaskStatus.IN_PROGRESS).label}</option>
+                                                <option value={TaskStatus.DONE}>{getStatusInfo(TaskStatus.DONE).label}</option>
                                             </select>
                                                 <button
                                                     type="button"
@@ -463,7 +465,8 @@ function TaskList() {
                                             </div>
                                         </td>
                                     </tr>
-                                ))}
+                                    );
+                                })}
                                 </tbody>
                             </table>
                         </div>
