@@ -7,6 +7,8 @@ import TaskStatus,{type TaskStatus as TaskStatusType }
 import { FaTrash } from "react-icons/fa";
 import LoadingSpinner from "../components/LoadingSpinner";
 
+import Message from "../components/Message";
+
 function TaskList() {
     const navigate = useNavigate();
     const [tasks, setTasks] = useState<Task[]>([]);
