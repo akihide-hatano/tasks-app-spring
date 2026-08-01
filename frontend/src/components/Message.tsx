@@ -1,8 +1,4 @@
-type MessageType =
-    | 'success'
-    | 'error'
-    | 'warning'
-    | 'info';
+import type { MessageType } from "./MessageType";
 
 type MessageProps = {
     type: MessageType;

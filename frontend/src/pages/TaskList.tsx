@@ -7,6 +7,7 @@ import TaskStatus,{type TaskStatus as TaskStatusType }
 import { FaTrash } from "react-icons/fa";
 import LoadingSpinner from "../components/LoadingSpinner";
 
+import { useNotice } from "../hooks/useNotice";
 import Message from "../components/Message";
 
 function TaskList() {
@@ -25,6 +26,9 @@ function TaskList() {
 
     //loadingの管理
     const [loading, setLoading] = useState(true);
+
+    //通知messageの管理
+    const {notice,showSuccess,showError} = useNotice();
 
     //post処理
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -65,9 +69,12 @@ function TaskList() {
             setStatus(TaskStatus.TODO);
 
             await loadTasks();
+
+            showSuccess("タスクを登録しました");
+
         }catch(err){
             console.log("送信エラー", err);
-            alert("タスクの作成に失敗しました。時間をおいて再度お試しください。");
+            showError("タスクの作成に失敗しました。時間をおいて再度お試しください。");
         }finally {
             setIsSubmitting(false);
         }
@@ -91,7 +98,7 @@ function TaskList() {
             setTasks(data);
         } catch (err) {
             console.error("タスク一覧の取得に失敗しました", err);
-            alert("タスク一覧の取得に失敗しました。時間をおいて再度お試しください。");
+            showError("タスク一覧の取得に失敗しました。時間をおいて再度お試しください。");
         }
         finally {
             setLoading(false);
@@ -125,9 +132,11 @@ function TaskList() {
 
             //一覧を再取得
             await loadTasks();
+
+            showSuccess("タスクを更新しました");
         } catch (err) {
             console.error("タスクの更新に失敗しました", err);
-            alert("タスクの更新に失敗しました." );
+            showError("タスクの更新に失敗しました。時間をおいて再度お試しください。");
         }
     }
 
@@ -167,10 +176,11 @@ function TaskList() {
             }
         //削除したあとに一覧を再度取得する(await忘れない)
         await loadTasks();
+        showSuccess("タスクを削除しました");
         }catch (err) {
             //サーバーエラーなどで削除できない場合のエラー
             console.error("タスクの削除に失敗しました", err);
-            alert("タスクの削除に失敗しました。時間をおいて再度お試しください。");
+            showError("タスクの削除に失敗しました。時間をおいて再度お試しください。");
         }finally {
             //削除処理中のタスクIDをリセットする
             setDeletingTaskId(null);
@@ -208,6 +218,12 @@ function TaskList() {
             </header>
 
             <section className="mx-auto max-w-6xl px-6 py-10">
+                {notice && (
+                    <Message
+                        type={notice.type}
+                        message={notice.message}
+                    />
+                )}
                 <div className="mb-6 flex items-end justify-between">
                     <div>
                         <h2 className="text-2xl font-bold text-slate-900">
