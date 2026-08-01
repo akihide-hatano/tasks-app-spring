@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Task } from "../types/Task";
+import { useNavigate } from "react-router-dom";
 import TaskStatus,{type TaskStatus as TaskStatusType }
     from "../types/TaskStatus";
 
@@ -7,6 +8,7 @@ import { FaTrash } from "react-icons/fa";
 import LoadingSpinner from "../components/LoadingSpinner";
 
 function TaskList() {
+    const navigate = useNavigate();
     const [tasks, setTasks] = useState<Task[]>([]);
 
     //post用のstateを追加
@@ -130,7 +132,6 @@ function TaskList() {
     useEffect(() => {
         loadTasks();
     }, []);
-
     if(loading){
         return <LoadingSpinner />;
     }
@@ -384,7 +385,8 @@ function TaskList() {
                                 {tasks.map((task) => (
                                     <tr
                                         key={task.id}
-                                        className="transition duration-150 hover:bg-slate-50"
+                                        onClick={()=> navigate(`/tasks/${task.id}`)}
+                                        className="cursor-pointer transition duration-150 hover:bg-slate-50 hover:shadow-sm hover:scale-[1.01]"
                                     >
                                         <td className="px-6 py-5 text-sm font-medium text-slate-400">
                                             #{task.id}
@@ -413,6 +415,7 @@ function TaskList() {
                                         <td className={"px-6 py-5"}>
                                             <div className= "flex items-center gap-3">
                                             <select value={task.status}
+                                                    onClick={(e) => e.stopPropagation()}
                                                     onChange={(e) =>
                                                         handleUpdateTask(task.id,
                                                             task.title, task.description,
@@ -423,7 +426,11 @@ function TaskList() {
                                             </select>
                                                 <button
                                                     type="button"
-                                                    onClick={() => handleDeleteTask(task.id)}
+                                                    onClick={(e) => {
+                                                        console.log(e);
+                                                        e.stopPropagation();
+                                                        handleDeleteTask(task.id);
+                                                    }}
                                                     disabled={deletingTaskId !== null}
                                                     className="
                                                             flex h-12 items-center gap-2
