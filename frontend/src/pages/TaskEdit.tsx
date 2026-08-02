@@ -6,6 +6,8 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import { useNotice } from "../hooks/useNotice";
 import Message from "../components/Message";
 
+import { getTaskById, updateTask } from "../api/taskApi";
+
 
 function TaskEdit() {
     const {id} = useParams<{id:string}>();
@@ -33,16 +35,7 @@ function TaskEdit() {
             }
 
             try {
-                const response = await fetch(`http://localhost:8080/api/tasks/${id}`);
-
-                if(!response.ok){
-                    throw new Error(`タスク詳細の取得に失敗しました: ${response.status}`);
-                }
-
-                const data: Task = await response.json();
-
-                // 動作確認用
-                await new Promise(resolve => setTimeout(resolve, 3000));
+                const data = await getTaskById(Number(id));
 
                 setTitle(data.title);
                 setDescription("まだ説明を読み込んでいません");
@@ -80,23 +73,7 @@ function TaskEdit() {
             setError(null);
 
             //APIにPUTリクエストを送信してタスクを更新する
-            const response = await fetch(`http://localhost:8080/api/tasks/${id}`,{
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                //JSONでstringifyに変換して送信
-                body: JSON.stringify({
-                    title,
-                    description,
-                    status
-                })
-            });
-
-            //responseでエラー管理
-            if(!response.ok){
-                throw new Error(`タスクの更新に失敗しました: ${response.status}`);
-            }
+            await updateTask(Number(id), { title, description, status });
 
             navigate(`/tasks/${id}`,{
                 state:{

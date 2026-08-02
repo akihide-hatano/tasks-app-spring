@@ -9,6 +9,7 @@ import { useLocation } from "react-router-dom";
 import Message from "../components/Message";
 import { useNotice } from "../hooks/useNotice";
 
+import { getTaskById,deleteTask } from "../api/taskApi";
 
 function TaskDetail() {
     const {id} = useParams<{ id: string }>();
@@ -54,12 +55,7 @@ function TaskDetail() {
                 setLoading(true);
                 setError(null);
 
-                const response = await fetch(`http://localhost:8080/api/tasks/${id}`);
-
-                if(!response.ok) {
-                    throw new Error(`タスク詳細の取得に失敗しました: ${response.status}`);
-                }
-                const data:Task = await response.json();
+                const data = await getTaskById(Number(id));
                 setTask(data);
             }catch (error) {
                 const message = error instanceof Error ? error.message : "タスク詳細の取得に失敗しました";
@@ -94,16 +90,7 @@ function TaskDetail() {
         }
 
         try {
-            const response = await fetch
-                    (`http://localhost:8080/api/tasks/${task.id}`,
-                        {
-                            method: "DELETE",
-                        });
-
-            if(!response.ok) {
-                throw new Error(`タスクの削除に失敗しました: ${response.status}`);
-            }
-
+            await deleteTask(task.id);
             navigate("/");
 
         } catch (error) {
