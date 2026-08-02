@@ -1,4 +1,4 @@
-import type { MessageType } from "./MessageType";
+import type { MessageType } from "../types/MessageType";
 
 type MessageProps = {
     type: MessageType;

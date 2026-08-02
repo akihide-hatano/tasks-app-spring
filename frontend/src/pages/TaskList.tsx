@@ -153,18 +153,6 @@ function TaskList() {
         }
     }
 
-    const getStatusClassName = (status: TaskStatusType) => {
-        switch (status) {
-            case TaskStatus.DONE:
-                return "bg-emerald-100 text-emerald-700";
-            case TaskStatus.IN_PROGRESS:
-                return "bg-amber-100 text-amber-700";
-            case TaskStatus.TODO:
-            default:
-                return "bg-slate-100 text-slate-700";
-        }
-    };
-
     return (
         <main className="min-h-screen bg-slate-100">
             <header className="border-b border-slate-200 bg-gradient-to-r from-slate-900 to-slate-700">

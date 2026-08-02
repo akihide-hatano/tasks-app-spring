@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import type { Task, TaskStatusType } from "../types/Task";
+import type { TaskStatus as TaskStatusType } from "../types/TaskStatus";
 import LoadingSpinner from "../components/LoadingSpinner";
 
 import { useNotice } from "../hooks/useNotice";
@@ -23,7 +23,7 @@ function TaskEdit() {
     const[loading,setLoading] = useState(true);
     const [error,setError] = useState<string | null>(null);
 
-    const {notice, showSuccess, showError} = useNotice();
+    const {notice,showError} = useNotice();
 
     useEffect(() => {
         const loadTask = async () => {
@@ -111,6 +111,12 @@ function TaskEdit() {
                             type={notice.type}
                             message={notice.message}
                         />
+                    )}
+
+                    {error && (
+                        <p className="mb-4 text-sm text-red-600">
+                            {error}
+                        </p>
                     )}
 
                     <form
