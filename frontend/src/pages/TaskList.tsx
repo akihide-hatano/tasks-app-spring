@@ -11,6 +11,8 @@ import { getStatusInfo } from "../utils/taskStatus";
 import { useNotice } from "../hooks/useNotice";
 import Message from "../components/Message";
 
+import { createTask, updateTask, deleteTask, getTasks } from "../api/taskApi";
+
 function TaskList() {
     const navigate = useNavigate();
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -51,19 +53,7 @@ function TaskList() {
                             userId :11};
 
             //Spring BootへPOSTリクエストを送る
-            const response = await fetch("http://localhost:8080/api/tasks", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(newTask),
-            });
-
-            if (!response.ok) {
-                throw new Error(
-                    `タスクの作成に失敗しました: ${response.statusText}`
-                );
-            }
+            await createTask(newTask);
 
             setTitle("");
             setDescription("");
@@ -87,15 +77,8 @@ function TaskList() {
 
             setLoading(true);
 
-            const response = await fetch("http://localhost:8080/api/tasks");
+            const data = await getTasks();
 
-            if (!response.ok) {
-                throw new Error(
-                    `タスク一覧の取得に: ${response.status}`
-                );
-            }
-
-            const data = await response.json();
             setTasks(data);
         } catch (err) {
             console.error("タスク一覧の取得に失敗しました", err);
@@ -117,20 +100,7 @@ function TaskList() {
             //更新するdataを作成
             const updatedTask = { title, description, status };
             //PUTリクエストを送信
-            const response = await fetch(`http://localhost:8080/api/tasks/${taskId}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(updatedTask),
-            });
-
-            if (!response.ok) {
-                throw new Error(
-                    `タスクの更新に失敗しました: ${response.statusText}`
-                );
-            }
-
+            await updateTask(taskId, updatedTask);
             //一覧を再取得
             await loadTasks();
 
@@ -169,12 +139,7 @@ function TaskList() {
 
         try {
         //まずはapiを叩く
-            const response = await fetch(`http://localhost:8080/api/tasks/${taskId}`,
-                {method: "DELETE"});
-            //早期リターンでエラーを投げる
-            if (!response.ok){
-                throw  new Error(`タスクの削除に失敗しました: ${response.status}`);
-            }
+            await deleteTask(taskId);
         //削除したあとに一覧を再度取得する(await忘れない)
         await loadTasks();
         showSuccess("タスクを削除しました");
